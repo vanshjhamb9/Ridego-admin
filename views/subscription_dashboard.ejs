@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+<head>
+  <%- include('./partials/head'); -%>
+    
+</head>
+<body onload="startTime()">
+    <%- include('./partials/header_sidebar'); -%>
+    
+    <div class="page-body">
+      <div class="container-fluid">
+        <div class="page-title">
+          <div class="row">
+            <div class="col-sm-6">
+                <h3>Subscription Dashboard</h3>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/index"><i data-feather="home"></i></a></li>
+                    <li class="breadcrumb-item">Dashboard</li>
+                    <li class="breadcrumb-item active">Subscription Dashboard</li>
+                </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="container-fluid">
+        <!-- Statistics Cards -->
+        <div class="row">
+            <div class="col-lg-3 col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Total Subscriptions</h5>
+                        <h3><%= totalSubscriptions %></h3>
+                        <p class="text-muted">All time subscriptions</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Active Subscriptions</h5>
+                        <h3 class="text-success"><%= activeSubscriptions %></h3>
+                        <p class="text-muted">Currently active</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Expired Subscriptions</h5>
+                        <h3 class="text-danger"><%= expiredSubscriptions %></h3>
+                        <p class="text-muted">Expired or inactive</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Total Revenue</h5>
+                        <h3 class="text-primary"><%= general.site_currency || '₹' %> <%= totalRevenue %></h3>
+                        <p class="text-muted">From subscriptions</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue by Plan -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Revenue by Plan</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Plan Name</th>
+                                        <th>Count</th>
+                                        <th>Revenue</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% revenueByPlan.forEach((plan) => { %>
+                                        <tr>
+                                            <td><%= plan.plan_name || 'N/A' %></td>
+                                            <td><%= plan.count %></td>
+                                            <td><%= general.site_currency || '₹' %> <%= plan.revenue %></td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expiring Soon -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Expiring Soon (Next 7 Days)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Driver</th>
+                                        <th>Plan</th>
+                                        <th>Remaining Days</th>
+                                        <th>Expires On</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (expiringSoon.length > 0) { %>
+                                        <% expiringSoon.forEach((driver) => { %>
+                                            <tr>
+                                                <td><%= driver.first_name %> <%= driver.last_name %></td>
+                                                <td><%= driver.plan_name || 'N/A' %></td>
+                                                <td><span class="badge badge-warning"><%= driver.remaining_days %> days</span></td>
+                                                <td><%= new Date(driver.subscription_end_date).toLocaleDateString() %></td>
+                                            </tr>
+                                        <% }) %>
+                                    <% } else { %>
+                                        <tr>
+                                            <td colspan="4" class="text-center">No subscriptions expiring soon</td>
+                                        </tr>
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <%- include('./partials/footer'); -%>
+    <%- include('./partials/script'); -%>
+</body>
+</html>
+
+
+
+
+
+

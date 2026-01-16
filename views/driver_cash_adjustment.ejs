@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+<head>
+    <%- include('./partials/head'); -%>
+    
+</head>
+<body onload="startTime()">
+    <%- include('./partials/header_sidebar'); -%>
+    
+    <!-- tap on top starts-->
+
+        <!-- Page Sidebar Ends-->
+        <div class="page-body">
+          <div class="container-fluid">
+            <div class="page-title">
+              <div class="row">
+                <div class="col-sm-6">
+                  <h3><%=lan.Cash%> <%=lan.Management%></h3>
+                </div>
+                <div class="col-sm-6">
+                  <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/index"><i data-feather="home"></i></a></li>
+                    <li class="breadcrumb-item"><%=lan.Dashboard%></li>
+                    <li class="breadcrumb-item active"><%=lan.Cash%> <%=lan.Management%></li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Container-fluid starts-->
+          <div class="container-fluid">
+            <!-- Driver Info Card -->
+            <div class="row mb-3">
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Driver Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <strong>Name:</strong> <%= driver.first_name %> <%= driver.last_name %>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Email:</strong> <%= driver.email %>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Phone:</strong> <%= driver.primary_phoneNo %>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Driver ID:</strong> #<%= driver.id %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wallet Balance Card -->
+            <div class="row mb-3">
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Wallet Balance & Statistics</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-12 col-md-6 col-lg-3">
+                                    <div class="card bg-primary text-white">
+                                        <div class="card-body text-center">
+                                            <h6>Current Wallet Balance</h6>
+                                            <h3><%= general.site_currency || '₹' %> <%= wallet_balance.toFixed(2) %></h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 col-md-6 col-lg-3">
+                                    <div class="card bg-success text-white">
+                                        <div class="card-body text-center">
+                                            <h6>Total Earnings</h6>
+                                            <h3><%= general.site_currency || '₹' %> <%= (wallet_stats.total_earnings || 0).toFixed(2) %></h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 col-md-6 col-lg-3">
+                                    <div class="card bg-warning text-white">
+                                        <div class="card-body text-center">
+                                            <h6>Total Withdrawals</h6>
+                                            <h3><%= general.site_currency || '₹' %> <%= (wallet_stats.total_withdrawals || 0).toFixed(2) %></h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 col-md-6 col-lg-3">
+                                    <div class="card bg-info text-white">
+                                        <div class="card-body text-center">
+                                            <h6>Payout Wallet</h6>
+                                            <h3><%= general.site_currency || '₹' %> <%= payout_wallet.toFixed(2) %></h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <p><strong>Total Credits:</strong> <%= wallet_stats.total_credits || 0 %> transactions</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Total Debits:</strong> <%= wallet_stats.total_debits || 0 %> transactions</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wallet Transaction History -->
+            <div class="row mb-3">
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Wallet Transaction History</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive theme-scrollbar">
+                                <table class="display" id="wallet-history-table">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Date</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% var j = 1 %>
+                                        <% if (wallet_history && wallet_history.length > 0) { %>
+                                            <% wallet_history.forEach((transaction) => { %>
+                                                <tr>
+                                                    <td><%= j %></td>
+                                                    <td><%= transaction.date %></td>
+                                                    <td>
+                                                        <% if (transaction.transaction_category === 'credit') { %>
+                                                            <span class="badge badge-success">Credit</span>
+                                                        <% } else if (transaction.transaction_category === 'debit') { %>
+                                                            <span class="badge badge-danger">Debit</span>
+                                                        <% } else { %>
+                                                            <span class="badge badge-warning">Pending</span>
+                                                        <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <%= transaction.transaction_type %>
+                                                        <% if (transaction.ride_id) { %>
+                                                            <br><small>Ride ID: #<%= transaction.ride_id %></small>
+                                                        <% } %>
+                                                        <% if (transaction.payment_method_name) { %>
+                                                            <br><small>Payment: <%= transaction.payment_method_name %></small>
+                                                        <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <% if (transaction.transaction_category === 'credit') { %>
+                                                            <span class="text-success"><%= general.site_currency || '₹' %> +<%= transaction.amount %></span>
+                                                        <% } else { %>
+                                                            <span class="text-danger"><%= general.site_currency || '₹' %> -<%= transaction.amount %></span>
+                                                        <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <% if (transaction.status == '1') { %>
+                                                            <span class="badge badge-success">Completed</span>
+                                                        <% } else if (transaction.status == '2') { %>
+                                                            <span class="badge badge-warning">Pending</span>
+                                                        <% } else { %>
+                                                            <span class="badge badge-secondary">Unknown</span>
+                                                        <% } %>
+                                                    </td>
+                                                </tr>
+                                            <% j++ %>
+                                            <% }) %>
+                                        <% } else { %>
+                                            <tr>
+                                                <td colspan="6" class="text-center">No wallet transactions found</td>
+                                            </tr>
+                                        <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cash Management Card -->
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-header col-12 pb-0">
+                            <div class="row">
+                                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-3 d-flex justify-content-center dborder">
+                                    <h5><%=lan.Available%> <%=lan.Cash%> <%=lan.Amount%> :-&nbsp;<h5><%= general.site_currency || '₹' %> <%= tot_cash.toFixed(2)%></h5></h5>
+                                </div>
+                                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-2 d-flex justify-content-center dborder">
+                                    <h5><%=lan.Block%> <%=lan.Amount%> :-&nbsp;<h5><%= general.site_currency || '₹' %> <%= (driver.tot_pendinga || 0).toFixed(2)%></h5></h5>
+                                </div>
+                                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-3 d-flex justify-content-center">
+                                    <h5><%=lan.Total%> <%=lan.Cash%> <%=lan.Amount%> :-&nbsp;<h5><%= general.site_currency || '₹' %> <%= (driver.tot_cash || 0).toFixed(2)%></h5></h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="mb-3">Cash Adjustment History</h6>
+                            <div class="table-responsive theme-scrollbar">
+                                <table class="display" id="cash-adjustment-table">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th><%=lan.Payment%> <%=lan.Image%></th>
+                                            <th><%=lan.Payment%> <%=lan.Method%></th>
+                                            <th><%=lan.Date%></th>
+                                            <th><%=lan.Amount%></th>
+                                            <th><%=lan.Status%></th>
+                                            <th><%=lan.Action%></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                      <% var i = 1 %>
+                                        <% if (cash_list && cash_list.length > 0) { %>
+                                            <% cash_list.forEach((data) => { %>
+                                                <tr>
+                                                    <td><%= i %></td>
+                                                    <td class="p-1">
+                                                      <% if(data.prof_image != ""){ %>
+                                                        <a href="../../<%= data.prof_image %>" target="_blank"><img width="50px" height="50px" src="../../<%= data.prof_image %>" alt="image"></a>
+                                                      <% } else { %>
+                                                        <span class="text-muted">No Image</span>
+                                                      <% }; %>
+                                                    </td>
+                                                    <td><%= data.payment_type || 'N/A' %></td>
+                                                    <td><%= data.date %></td>
+                                                    <td><%= general.site_currency || '₹' %> <%= data.amount %></td>
+                                                    <td>
+                                                        <% if (data.status == '1') { %>
+                                                            <span class="badge badge-success"><%=lan.Approved%></span>
+                                                        <% } else { %>
+                                                            <span class="badge badge-danger"><%=lan.Pending%></span>
+                                                        <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <ul class="action"> 
+                                                            <li class="edit"><a type="button" data-bs-toggle="modal" data-bs-target="#edit_cash_status_module" id="edit_cash_status" data-id="<%= data.id %>" 
+                                                                data-prof_image="<%= data.prof_image %>" data-payment_type="<%= data.payment_type %>" data-date="<%= data.date %>" 
+                                                                data-amount="<%= data.amount %>" data-status="<%= data.status %>"><i class="icon-pencil-alt"></i></a></li>
+                                                        </ul>
+                                                    </td>
+                                                </tr>
+                                            <% i++ %>
+                                            <% }) %>
+                                        <% } else { %>
+                                            <tr>
+                                                <td colspan="7" class="text-center">No cash adjustment records found</td>
+                                            </tr>
+                                        <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          </div>
+          <!-- Container-fluid Ends-->
+        </div>
+
+        <div class="modal fade" id="edit_cash" tabindex="-1" role="dialog" aria-labelledby="edit_cash" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><%=lan.Edit%> <%=lan.Cash%> <%=lan.Amount%></h5>
+                        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form  class="needs-validation" id="edit_cash_form" novalidate="" action="" method="post">
+                        <div class="modal-body">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label"><%=lan.Cash%> <%=lan.Amount%></label>
+                                    <input class="form-control" id="cash_amount_input" name="cash_amount" type="number" value="<%=lan.Cash%> <%=lan.Amount%>">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" type="button" data-bs-dismiss="modal"><%=lan.Close%></button>
+                            <button class="btn btn-primary" type="submit"><%=lan.Update%></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="edit_cash_status_module" tabindex="-1" role="dialog" aria-labelledby="edit_cash_status_module" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><%=lan.Edit%> <%=lan.Cash%> <%=lan.Status%></h5>
+                        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form  class="needs-validation" id="cash_edit_status_form" novalidate="" action="" method="post">
+                        <div class="modal-body">
+                            <div class="row g-3">
+                                <div class="col-12 text-center">
+                                    <a id="edit_cash_imga" href="" target="_blank"><img class="p-0" id="edit_cash_img" width="100px" height="100px" src="" alt="image"></a>
+                                </div>
+
+                                <div class="col-12 mt-3">
+                                    <h5><%=lan.Payment%> <%=lan.Method%> :- <span class="f-w-400 cash_pm"></span></h5>
+                                </div>
+
+                                <div class="col-12 mt-1">
+                                    <h5><%=lan.Date%> :- <span class="f-w-400 cash_date"></span></h5>
+                                </div>
+
+                                <div class="col-12 mt-1">
+                                    <h5><%=lan.Amount%> :- <span class="f-w-400 cash_amount"></span></h5>
+                                </div>
+
+                                <div class="col-12 mt-1 d-flex">
+                                    <label class="col-form-label m-r-10"> <%=lan.Status%></label>
+                                    <div class="icon-state switch-outline">
+                                        <label class="switch">
+                                            <input type="checkbox" id="cash_status" name="cash_status"><span class="switch-state bg-success"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" type="button" data-bs-dismiss="modal"><%=lan.Close%></button>
+                            <button class="btn btn-primary" type="submit"><%=lan.Save%></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    <%- include('./partials/footer'); -%>
+    <%- include('./partials/script'); -%>
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable for wallet history
+            if ($('#wallet-history-table').length) {
+                $('#wallet-history-table').DataTable({
+                    "order": [[ 0, "desc" ]],
+                    "pageLength": 10
+                });
+            }
+            
+            // Initialize DataTable for cash adjustment
+            if ($('#cash-adjustment-table').length) {
+                $('#cash-adjustment-table').DataTable({
+                    "order": [[ 0, "desc" ]],
+                    "pageLength": 10
+                });
+            }
+        });
+    </script>
+  </body>
+</html>

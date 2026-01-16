@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+<head>
+    <%- include('./partials/head'); -%>
+    
+</head>
+<body onload="startTime()">
+    <%- include('./partials/header_sidebar'); -%>
+    
+    <!-- tap on top starts-->
+
+        <!-- Page Sidebar Ends-->
+        <div class="page-body">
+          <div class="container-fluid">
+            <div class="page-title">
+              <div class="row">
+                <div class="col-sm-6">
+                  <h3><%=lan.Driver%> <%=lan.List%></h3>
+                </div>
+                <div class="col-sm-6">
+                  <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/index"><i data-feather="home"></i></a></li>
+                    <li class="breadcrumb-item"><%=lan.Dashboard%></li>
+                    <li class="breadcrumb-item active"><%=lan.Driver%> <%=lan.List%></li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Container-fluid starts-->
+          <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="card">
+                        <% let permiss = per != "1" ? per.driver[1] : "1" %>
+                        <% if(permiss == "1"){ %>
+                        <div class="card-header d-flex justify-content-end pb-0">
+                            <a class="btn btn-square btn-primary b-r-10" type="button" href="/driver/add"><%=lan.Add%> <%=lan.Driver%></a>
+                        </div>
+                        <% } %>
+                        <div class="card-body">
+                            <!-- Subscription Filter -->
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label>Filter by Subscription:</label>
+                                    <select class="form-control" id="subscription_filter" onchange="filterBySubscription()">
+                                        <option value="all" <%= subscription_filter === 'all' ? 'selected' : '' %>>All Drivers</option>
+                                        <option value="active" <%= subscription_filter === 'active' ? 'selected' : '' %>>Active Subscriptions</option>
+                                        <option value="expired" <%= subscription_filter === 'expired' ? 'selected' : '' %>>Expired Subscriptions</option>
+                                        <option value="expiring_soon" <%= subscription_filter === 'expiring_soon' ? 'selected' : '' %>>Expiring Soon (7 days)</option>
+                                        <option value="none" <%= subscription_filter === 'none' ? 'selected' : '' %>>No Subscription</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="table-responsive theme-scrollbar">
+                                <table class="display" id="basic-1">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th><%=lan.Name%></th>
+                                            <th><%=lan.Email%></th>
+                                            <th><%=lan.Phone%> <%=lan.Number%></th>
+                                            <th><%=lan.Vehicle%> <%=lan.Name%></th>
+                                            <th>Subscription</th>
+                                            <th>Remaining Days</th>
+                                            <th><%=lan.Approved%></th>
+                                            <th><%=lan.Status%></th>
+                                            <th><%=lan.Cash%> <%=lan.Management%></th>
+                                            <% let permissions = per != "1" ? per.driver[2] : "1" %>
+                                            <% if(permissions == "1"){ %>
+                                            <th><%=lan.Action%></th>
+                                            <% } %>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% var i = 1 %>
+                                        <% driver_list.forEach((data) => { %>
+                                            <tr>
+                                                <td><%= i %></td>
+                                                <td><%= data.first_name %> <%= data.last_name %></td>
+                                                <td><%= data.email %></td>
+                                                <td><%= data.primary_ccode %> <%= data.primary_phoneNo %></td>
+                                                <td>
+                                                    <%= data.vname || 'N/A' %>
+                                                    <% if (data.vehicle_number) { %>
+                                                        <br><small class="text-muted">#<%= data.vehicle_number %></small>
+                                                    <% } %>
+                                                </td>
+                                                <td>
+                                                    <% if (data.actual_subscription_status === 'active' && data.remaining_days >= 0) { %>
+                                                        <span class="badge badge-success">Active</span><br>
+                                                        <small><%= data.subscription_plan_name || 'N/A' %></small>
+                                                    <% } else if (data.actual_subscription_status === 'expired' || data.remaining_days < 0) { %>
+                                                        <span class="badge badge-danger">Expired</span>
+                                                    <% } else if (data.actual_subscription_status === 'none' || !data.actual_subscription_status) { %>
+                                                        <span class="badge badge-secondary">None</span>
+                                                    <% } else { %>
+                                                        <span class="badge badge-warning"><%= data.actual_subscription_status || 'None' %></span>
+                                                    <% } %>
+                                                </td>
+                                                <td>
+                                                    <% if (data.actual_subscription_status === 'active' && data.remaining_days >= 0) { %>
+                                                        <span class="badge badge-info"><%= data.remaining_days %> days</span>
+                                                    <% } else if (data.actual_subscription_status === 'expired' || data.remaining_days < 0) { %>
+                                                        <span class="badge badge-danger">Expired</span>
+                                                    <% } else { %>
+                                                        <small class="text-muted">-</small>
+                                                    <% } %>
+                                                </td>
+                                                <td>
+                                                    <% if (data.approval_status == '1') { %>
+                                                        <span class="badge badge-success"><%=lan.Approved%></span>
+                                                    <% } else { %>
+                                                        <span class="badge badge-danger"><%=lan.Pending%></span>
+                                                    <% } %>
+                                                </td>
+                                                <td>
+                                                    <% if (data.status == '1') { %>
+                                                        <span class="badge badge-success"><%=lan.Active%></span>
+                                                    <% } else { %>
+                                                        <span class="badge badge-danger"><%=lan.Deactive%></span>
+                                                    <% } %>
+                                                </td>
+                                                <td class="d-flex justify-content-center">
+                                                    <a href="/driver/cash_adjustment/<%= data.id %>"><span class="badge badge-primary" style="padding: 4px 15px 4px 15px;"><i class="fa fa-money f-18"></i></span></a>
+                                                </td>
+                                                <% if(permissions == "1"){ %>
+                                                <td> 
+                                                    <ul class="action"> 
+                                                        <li class="text-primary"><a href="/driver/profile/<%= data.id %>"><i class="icon-user f-14"></i></a></li>
+                                                        <li class="text-primary" style="margin-left: 8px;"><a href="/driver/document/<%= data.id %>"><i class="icon-id-badge f-20"></i></a></li>
+                                                        <li class="edit" style="margin-left: 8px;"><a href="/driver/edit/<%= data.id %>"><i class="icon-pencil-alt"></i></a></li>
+                                                        <li class="delete"><a href="/driver/delete/<%= data.id %>"><i class="icon-trash"></i></a></li>
+                                                    </ul>
+                                                </td>
+                                                <% } %>
+                                            </tr>
+                                        <% i++ %>
+                                        <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          </div>
+          <!-- Container-fluid Ends-->
+        </div>
+        <script>
+            function filterBySubscription() {
+                const filter = document.getElementById('subscription_filter').value;
+                window.location.href = '/driver/list?subscription_filter=' + filter;
+            }
+        </script>
+
+    <%- include('./partials/footer'); -%>
+    <%- include('./partials/script'); -%>
+  </body>
+</html>
